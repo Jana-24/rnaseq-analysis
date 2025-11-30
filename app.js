@@ -202,11 +202,10 @@ async function getJobStatus(jobId) {
     try {
         const url = `${APPS_SCRIPT_URL}?action=get_status&job_id=${jobId}`;
         
+        // Simple GET request - no custom headers to avoid CORS preflight
         const response = await fetch(url, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json'
-            }
+            method: 'GET'
+            // NO headers - they trigger CORS preflight
         });
         
         if (!response.ok) {
@@ -240,11 +239,10 @@ async function getJobResults(jobId) {
     try {
         const url = `${APPS_SCRIPT_URL}?action=get_results&job_id=${jobId}`;
         
+        // Simple GET request - no custom headers to avoid CORS preflight
         const response = await fetch(url, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json'
-            }
+            method: 'GET'
+            // NO headers - they trigger CORS preflight
         });
         
         if (!response.ok) {
