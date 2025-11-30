@@ -12,7 +12,7 @@
  * const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX/exec';
  */
 
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/YOUR_SCRIPT_ID_HERE/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxfSjbhX4dqAtptYecF-9zpAtKYSswn2cJQT0n28ndeZzwZRsBM0X_gaNH3f3AHmIbu4w/exec';
 
 /**
  * Other configuration options
