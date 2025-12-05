@@ -431,11 +431,25 @@ https://drive.google.com/file/d/1XYZ.../view" required></textarea>
                     links: linkList
                 });
                 
+                console.log('Submitting job with params:', params.toString());
+                
                 const response = await fetch(`${API_URL}?${params.toString()}`);
-                const data = await response.json();
+                const responseText = await response.text();
+                
+                console.log('Response:', responseText);
+                
+                let data;
+                try {
+                    data = JSON.parse(responseText);
+                } catch (parseError) {
+                    throw new Error('Invalid response from server. Please try again.');
+                }
+                
+                console.log('Parsed data:', data);
                 
                 if (data.success) {
                     result.className = 'result-box success';
+                    result.style.display = 'block';
                     result.innerHTML = `
                         <h3>✅ Job Created Successfully!</h3>
                         <div class="job-id-box">
@@ -446,18 +460,19 @@ https://drive.google.com/file/d/1XYZ.../view" required></textarea>
                             </div>
                             <span class="job-id-hint">⚠️ Save this ID to check your results later!</span>
                         </div>
-                        <p><strong>Files:</strong> ${data.total_files} FASTQ files</p>
+                        <p><strong>Files:</strong> ${data.total_files || 0} FASTQ files</p>
                         <p>📧 You will receive an email confirmation shortly.</p>
                         <a href="status.html?job_id=${data.job_id}">📊 Track Job Status →</a>
                     `;
                     
                     document.getElementById('submitForm').reset();
                 } else {
-                    throw new Error(data.error || 'Unknown error');
+                    throw new Error(data.error || 'Job creation failed. Please check your Drive links.');
                 }
                 
             } catch (error) {
                 result.className = 'result-box error';
+                result.style.display = 'block';
                 result.innerHTML = `
                     <h3>❌ Submission Failed</h3>
                     <p>${error.message}</p>
