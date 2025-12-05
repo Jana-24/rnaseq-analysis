@@ -308,6 +308,37 @@
             line-height: 1.6;
         }
         
+        .link-type-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        
+        .link-type-badge.folder {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .link-type-badge.file {
+            background: #cce5ff;
+            color: #004085;
+        }
+        
+        .tip-box {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+        
+        .tip-box strong {
+            color: #0c5460;
+        }
+        
         footer {
             background: #f8f9fa;
             padding: 20px;
@@ -354,10 +385,15 @@
                     <h4>📋 How to upload via shared links:</h4>
                     <ol>
                         <li><strong>Upload your FASTQ files to YOUR Google Drive</strong> (any folder)</li>
-                        <li><strong>For each file</strong>: Right-click → Share → Change to "Anyone with the link"</li>
+                        <li><strong>Share the folder OR individual files</strong>: Right-click → Share → Change to "Anyone with the link"</li>
                         <li><strong>Copy the share link</strong> and paste it below</li>
-                        <li>Click "Submit" - we'll copy files to our processing server</li>
+                        <li>Click "Submit" - we'll copy all FASTQ files to our processing server</li>
                     </ol>
+                </div>
+                
+                <div class="tip-box">
+                    <strong>💡 Pro Tip:</strong> You can paste a <strong>folder link</strong> and all FASTQ files inside will be copied automatically! 
+                    This is the easiest way to upload multiple files at once.
                 </div>
 
                 <form id="sharedLinksForm">
@@ -367,15 +403,16 @@
                     </div>
 
                     <div class="form-group">
-                        <label>Google Drive File Links</label>
-                        <small style="margin-bottom: 10px;">Paste the shareable link for each FASTQ file (.fq.gz)</small>
+                        <label>Google Drive Links (File or Folder)</label>
+                        <small style="margin-bottom: 10px;">Paste a folder link (all FASTQ files copied) OR individual file links</small>
                         <div id="linkInputs">
                             <div class="link-input-group">
-                                <input type="url" placeholder="https://drive.google.com/file/d/..." required>
+                                <input type="url" placeholder="https://drive.google.com/drive/folders/... OR .../file/d/..." required oninput="detectLinkType(this)">
+                                <span class="link-type-indicator"></span>
                                 <button type="button" onclick="removeLink(this)">Remove</button>
                             </div>
                         </div>
-                        <button type="button" class="btn-add" onclick="addLinkInput()">+ Add Another File</button>
+                        <button type="button" class="btn-add" onclick="addLinkInput()">+ Add Another Link</button>
                     </div>
 
                     <button type="submit" class="btn-primary">Submit Job</button>
@@ -425,6 +462,10 @@
                     <button onclick="copyJobId()" class="btn-secondary" style="margin-left: 10px;">Copy</button>
                 </div>
                 <div id="filesSummary"></div>
+                <div id="errorsSection" style="display: none; margin-top: 15px; padding: 15px; background: #fff3cd; border-radius: 8px;">
+                    <strong>⚠️ Some issues:</strong>
+                    <ul id="errorsList" style="margin-left: 20px; margin-top: 10px;"></ul>
+                </div>
                 <p style="margin-top: 15px;">Save this Job ID to check status and retrieve results later.</p>
                 <div style="margin-top: 20px;">
                     <a href="status.html" class="btn-secondary">Check Status</a>
@@ -477,7 +518,8 @@
             const newInput = document.createElement('div');
             newInput.className = 'link-input-group';
             newInput.innerHTML = `
-                <input type="url" placeholder="https://drive.google.com/file/d/..." required>
+                <input type="url" placeholder="https://drive.google.com/drive/folders/... OR .../file/d/..." required oninput="detectLinkType(this)">
+                <span class="link-type-indicator"></span>
                 <button type="button" onclick="removeLink(this)">Remove</button>
             `;
             container.appendChild(newInput);
@@ -489,6 +531,21 @@
                 button.parentElement.remove();
             }
         }
+        
+        function detectLinkType(input) {
+            const value = input.value.trim();
+            const indicator = input.parentElement.querySelector('.link-type-indicator');
+            
+            if (!indicator) return;
+            
+            if (value.includes('/folders/')) {
+                indicator.innerHTML = '<span class="link-type-badge folder">📁 Folder</span>';
+            } else if (value.includes('/file/d/') || value.includes('id=')) {
+                indicator.innerHTML = '<span class="link-type-badge file">📄 File</span>';
+            } else {
+                indicator.innerHTML = '';
+            }
+        }
 
         // Shared Links Form Submission
         document.getElementById('sharedLinksForm').addEventListener('submit', async (e) => {
@@ -498,19 +555,20 @@
             const linkInputs = document.querySelectorAll('#linkInputs input');
             const fileLinks = [];
             
-            linkInputs.forEach(input => {
+            linkInputs.forEach((input, index) => {
                 if (input.value.trim()) {
-                    // Extract filename from link or use generic name
-                    const fileName = `file_${fileLinks.length + 1}.fq.gz`;
+                    // Determine if folder or file for better naming
+                    const isFolder = input.value.includes('/folders/');
+                    const linkName = isFolder ? `folder_${index + 1}` : `file_${index + 1}.fq.gz`;
                     fileLinks.push({
-                        name: fileName,
+                        name: linkName,
                         url: input.value.trim()
                     });
                 }
             });
             
             if (fileLinks.length === 0) {
-                alert('Please add at least one file link');
+                alert('Please add at least one link');
                 return;
             }
             
@@ -548,10 +606,18 @@
                     const summary = `
                         <p style="margin-top: 15px;">
                             <strong>Files copied:</strong> ${result.files_copied}<br>
-                            ${result.files_failed > 0 ? `<span style="color: #dc3545;"><strong>Files failed:</strong> ${result.files_failed}</span>` : ''}
+                            <strong>Links processed:</strong> ${result.files_total}
+                            ${result.files_failed > 0 ? `<br><span style="color: #dc3545;"><strong>Issues:</strong> ${result.files_failed}</span>` : ''}
                         </p>
                     `;
                     document.getElementById('filesSummary').innerHTML = summary;
+                    
+                    // Show errors if any
+                    if (result.errors && result.errors.length > 0) {
+                        document.getElementById('errorsSection').style.display = 'block';
+                        const errorsList = document.getElementById('errorsList');
+                        errorsList.innerHTML = result.errors.map(err => `<li>${err}</li>`).join('');
+                    }
                 }, 500);
                 
             } catch (error) {
