@@ -1,46 +1,674 @@
-// config.js - Configuration for RNA-seq Analysis Platform
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RNA-seq Analysis Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        nav {
+            background: #f8f9fa;
+            padding: 0;
+            display: flex;
+            border-bottom: 2px solid #e9ecef;
+        }
+        
+        nav a {
+            flex: 1;
+            padding: 20px;
+            text-align: center;
+            text-decoration: none;
+            color: #495057;
+            font-weight: 600;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        nav a:hover {
+            background: #e9ecef;
+        }
+        
+        nav a.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+        
+        main {
+            padding: 40px;
+        }
+        
+        .method-selector {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .method-card {
+            flex: 1;
+            padding: 30px;
+            border: 3px solid #e9ecef;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+        
+        .method-card:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+        
+        .method-card.active {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+        
+        .method-card h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 1.5em;
+        }
+        
+        .method-card .icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+        
+        .upload-section {
+            display: none;
+        }
+        
+        .upload-section.active {
+            display: block;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #495057;
+            font-weight: 600;
+        }
+        
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .form-group small {
+            display: block;
+            margin-top: 5px;
+            color: #6c757d;
+        }
+        
+        .link-input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .link-input-group input {
+            flex: 1;
+        }
+        
+        .link-input-group button {
+            padding: 12px 20px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        
+        .btn-primary {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .btn-primary:hover {
+            transform: scale(1.02);
+        }
+        
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .btn-secondary {
+            padding: 12px 24px;
+            background: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-add {
+            padding: 10px 20px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        
+        .file-list {
+            margin: 20px 0;
+        }
+        
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+        
+        .progress-section {
+            margin-top: 30px;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 15px;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #e9ecef;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s;
+            border-radius: 15px;
+        }
+        
+        .result-section,
+        .error-section {
+            margin-top: 30px;
+            padding: 30px;
+            border-radius: 15px;
+        }
+        
+        .result-section {
+            background: #d4edda;
+            border: 2px solid #28a745;
+        }
+        
+        .error-section {
+            background: #f8d7da;
+            border: 2px solid #dc3545;
+        }
+        
+        .job-info {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-family: monospace;
+            font-size: 16px;
+        }
+        
+        .info-box {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .info-box h4 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+        
+        .instructions {
+            background: #e7f3ff;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .instructions ol {
+            margin-left: 20px;
+            margin-top: 10px;
+        }
+        
+        .instructions li {
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+        
+        .link-type-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        
+        .link-type-badge.folder {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .link-type-badge.file {
+            background: #cce5ff;
+            color: #004085;
+        }
+        
+        .tip-box {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+        
+        .tip-box strong {
+            color: #0c5460;
+        }
+        
+        footer {
+            background: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🧬 RNA-seq Analysis Platform</h1>
+            <p>Upload FASTQ files for automated analysis</p>
+        </header>
 
-/**
- * SETUP INSTRUCTIONS:
- * 
- * 1. Deploy your Google Apps Script as a web app
- * 2. Copy the web app URL
- * 3. Replace YOUR_SCRIPT_ID_HERE with your actual script ID
- * 4. The URL format is: https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec
- * 
- * Example:
- * const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX/exec';
- */
+        <nav>
+            <a href="#" class="active">Upload</a>
+            <a href="status.html">Check Status</a>
+            <a href="results.html">Results</a>
+        </nav>
 
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxfSjbhX4dqAtptYecF-9zpAtKYSswn2cJQT0n28ndeZzwZRsBM0X_gaNH3f3AHmIbu4w/exec';
+        <main>
+            <h2 style="margin-bottom: 20px;">Choose Upload Method</h2>
+            
+            <div class="method-selector">
+                <div class="method-card active" onclick="selectMethod('shared')">
+                    <div class="icon">🔗</div>
+                    <h3>Shared Links</h3>
+                    <p>Upload to your Drive, then share links</p>
+                    <small style="color: #28a745; font-weight: bold;">✓ Recommended - No size limits!</small>
+                </div>
+                
+                <div class="method-card" onclick="selectMethod('direct')">
+                    <div class="icon">📤</div>
+                    <h3>Direct Upload</h3>
+                    <p>Upload files directly from your computer</p>
+                    <small style="color: #6c757d;">Limited to 50MB per file</small>
+                </div>
+            </div>
 
-/**
- * Other configuration options
- */
-const CONFIG = {
-    // Maximum file size (5GB)
-    MAX_FILE_SIZE: 5 * 1024 * 1024 * 1024,
-    
-    // Maximum number of files per job
-    MAX_FILES_PER_JOB: 20,
-    
-    // Chunk size for large file uploads (10MB)
-    UPLOAD_CHUNK_SIZE: 10 * 1024 * 1024,
-    
-    // Auto-refresh interval for status page (milliseconds)
-    STATUS_REFRESH_INTERVAL: 10000,
-    
-    // Allowed file extensions
-    ALLOWED_EXTENSIONS: ['.fq.gz', '.fastq.gz'],
-    
-    // App metadata
-    APP_NAME: 'RNA-seq Analysis Platform',
-    APP_VERSION: '1.0.0',
-    GITHUB_REPO: 'https://github.com/yourusername/rnaseq-analysis'
-};
+            <!-- SHARED LINKS METHOD -->
+            <div id="sharedLinksSection" class="upload-section active">
+                <div class="instructions">
+                    <h4>📋 How to upload via shared links:</h4>
+                    <ol>
+                        <li><strong>Upload your FASTQ files to YOUR Google Drive</strong> (any folder)</li>
+                        <li><strong>Share the folder OR individual files</strong>: Right-click → Share → Change to "Anyone with the link"</li>
+                        <li><strong>Copy the share link</strong> and paste it below</li>
+                        <li>Click "Submit" - we'll copy all FASTQ files to our processing server</li>
+                    </ol>
+                </div>
+                
+                <div class="tip-box">
+                    <strong>💡 Pro Tip:</strong> You can paste a <strong>folder link</strong> and all FASTQ files inside will be copied automatically! 
+                    This is the easiest way to upload multiple files at once.
+                </div>
 
-// Validate configuration
-if (APPS_SCRIPT_URL.includes('YOUR_SCRIPT_ID_HERE')) {
-    console.warn('⚠️ Google Apps Script URL not configured!');
-    console.warn('Please update config.js with your deployed Apps Script URL');
-}
+                <form id="sharedLinksForm">
+                    <div class="form-group">
+                        <label for="emailShared">Your Email</label>
+                        <input type="email" id="emailShared" required placeholder="your.email@example.com">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Google Drive Links (File or Folder)</label>
+                        <small style="margin-bottom: 10px;">Paste a folder link (all FASTQ files copied) OR individual file links</small>
+                        <div id="linkInputs">
+                            <div class="link-input-group">
+                                <input type="url" placeholder="https://drive.google.com/drive/folders/... OR .../file/d/..." required oninput="detectLinkType(this)">
+                                <span class="link-type-indicator"></span>
+                                <button type="button" onclick="removeLink(this)">Remove</button>
+                            </div>
+                        </div>
+                        <button type="button" class="btn-add" onclick="addLinkInput()">+ Add Another Link</button>
+                    </div>
+
+                    <button type="submit" class="btn-primary">Submit Job</button>
+                </form>
+            </div>
+
+            <!-- DIRECT UPLOAD METHOD -->
+            <div id="directUploadSection" class="upload-section">
+                <div class="info-box">
+                    <h4>⚠️ Note:</h4>
+                    <p>Direct upload is limited to 50MB per file due to browser constraints. For larger files, please use the Shared Links method.</p>
+                </div>
+
+                <form id="directUploadForm">
+                    <div class="form-group">
+                        <label for="emailDirect">Your Email</label>
+                        <input type="email" id="emailDirect" required placeholder="your.email@example.com">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="fileInput">Select FASTQ Files (.fq.gz)</label>
+                        <input type="file" id="fileInput" multiple accept=".fq.gz,.fastq.gz" required>
+                        <small>Maximum 50MB per file</small>
+                    </div>
+
+                    <div id="fileList" class="file-list"></div>
+
+                    <button type="submit" class="btn-primary">Upload & Start Analysis</button>
+                </form>
+            </div>
+
+            <!-- PROGRESS -->
+            <div id="uploadProgress" class="progress-section" style="display: none;">
+                <h3>Processing...</h3>
+                <div class="progress-bar">
+                    <div id="progressFill" class="progress-fill" style="width: 0%"></div>
+                </div>
+                <p id="progressText">Initializing...</p>
+            </div>
+
+            <!-- SUCCESS -->
+            <div id="uploadResult" class="result-section" style="display: none;">
+                <h3>✓ Job Created Successfully!</h3>
+                <p>Your files have been received and queued for analysis.</p>
+                <div class="job-info">
+                    <strong>Job ID:</strong> <span id="jobId"></span>
+                    <button onclick="copyJobId()" class="btn-secondary" style="margin-left: 10px;">Copy</button>
+                </div>
+                <div id="filesSummary"></div>
+                <div id="errorsSection" style="display: none; margin-top: 15px; padding: 15px; background: #fff3cd; border-radius: 8px;">
+                    <strong>⚠️ Some issues:</strong>
+                    <ul id="errorsList" style="margin-left: 20px; margin-top: 10px;"></ul>
+                </div>
+                <p style="margin-top: 15px;">Save this Job ID to check status and retrieve results later.</p>
+                <div style="margin-top: 20px;">
+                    <a href="status.html" class="btn-secondary">Check Status</a>
+                    <button onclick="location.reload()" class="btn-secondary" style="margin-left: 10px;">Upload More</button>
+                </div>
+            </div>
+
+            <!-- ERROR -->
+            <div id="uploadError" class="error-section" style="display: none;">
+                <h3>❌ Upload Failed</h3>
+                <p id="errorMessage"></p>
+                <button onclick="location.reload()" class="btn-secondary">Try Again</button>
+            </div>
+        </main>
+
+        <footer>
+            <p>RNA-seq Analysis Platform • Free & Open Source</p>
+        </footer>
+    </div>
+
+    <script>
+        // Configuration
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxfSjbhX4dqAtptYecF-9zpAtKYSswn2cJQT0n28ndeZzwZRsBM0X_gaNH3f3AHmIbu4w/exec';
+        
+        let currentMethod = 'shared';
+
+        function selectMethod(method) {
+            currentMethod = method;
+            
+            // Update cards
+            document.querySelectorAll('.method-card').forEach(card => {
+                card.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+            
+            // Update sections
+            document.querySelectorAll('.upload-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            if (method === 'shared') {
+                document.getElementById('sharedLinksSection').classList.add('active');
+            } else {
+                document.getElementById('directUploadSection').classList.add('active');
+            }
+        }
+
+        function addLinkInput() {
+            const container = document.getElementById('linkInputs');
+            const newInput = document.createElement('div');
+            newInput.className = 'link-input-group';
+            newInput.innerHTML = `
+                <input type="url" placeholder="https://drive.google.com/drive/folders/... OR .../file/d/..." required oninput="detectLinkType(this)">
+                <span class="link-type-indicator"></span>
+                <button type="button" onclick="removeLink(this)">Remove</button>
+            `;
+            container.appendChild(newInput);
+        }
+
+        function removeLink(button) {
+            const container = document.getElementById('linkInputs');
+            if (container.children.length > 1) {
+                button.parentElement.remove();
+            }
+        }
+        
+        function detectLinkType(input) {
+            const value = input.value.trim();
+            const indicator = input.parentElement.querySelector('.link-type-indicator');
+            
+            if (!indicator) return;
+            
+            if (value.includes('/folders/')) {
+                indicator.innerHTML = '<span class="link-type-badge folder">📁 Folder</span>';
+            } else if (value.includes('/file/d/') || value.includes('id=')) {
+                indicator.innerHTML = '<span class="link-type-badge file">📄 File</span>';
+            } else {
+                indicator.innerHTML = '';
+            }
+        }
+
+        // Shared Links Form Submission
+        document.getElementById('sharedLinksForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('emailShared').value;
+            const linkInputs = document.querySelectorAll('#linkInputs input');
+            const fileLinks = [];
+            
+            linkInputs.forEach((input, index) => {
+                if (input.value.trim()) {
+                    // Determine if folder or file for better naming
+                    const isFolder = input.value.includes('/folders/');
+                    const linkName = isFolder ? `folder_${index + 1}` : `file_${index + 1}.fq.gz`;
+                    fileLinks.push({
+                        name: linkName,
+                        url: input.value.trim()
+                    });
+                }
+            });
+            
+            if (fileLinks.length === 0) {
+                alert('Please add at least one link');
+                return;
+            }
+            
+            // Hide form, show progress
+            document.getElementById('sharedLinksSection').style.display = 'none';
+            document.getElementById('uploadProgress').style.display = 'block';
+            updateProgress(30, 'Submitting job to server...');
+            
+            try {
+                const response = await fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'create_job_from_links',
+                        data: {
+                            user_email: email,
+                            file_links: fileLinks
+                        }
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.error) {
+                    throw new Error(result.error);
+                }
+                
+                updateProgress(100, 'Files copied successfully!');
+                
+                // Show success
+                setTimeout(() => {
+                    document.getElementById('uploadProgress').style.display = 'none';
+                    document.getElementById('uploadResult').style.display = 'block';
+                    document.getElementById('jobId').textContent = result.job_id;
+                    
+                    const summary = `
+                        <p style="margin-top: 15px;">
+                            <strong>Files copied:</strong> ${result.files_copied}<br>
+                            <strong>Links processed:</strong> ${result.files_total}
+                            ${result.files_failed > 0 ? `<br><span style="color: #dc3545;"><strong>Issues:</strong> ${result.files_failed}</span>` : ''}
+                        </p>
+                    `;
+                    document.getElementById('filesSummary').innerHTML = summary;
+                    
+                    // Show errors if any
+                    if (result.errors && result.errors.length > 0) {
+                        document.getElementById('errorsSection').style.display = 'block';
+                        const errorsList = document.getElementById('errorsList');
+                        errorsList.innerHTML = result.errors.map(err => `<li>${err}</li>`).join('');
+                    }
+                }, 500);
+                
+            } catch (error) {
+                document.getElementById('uploadProgress').style.display = 'none';
+                document.getElementById('uploadError').style.display = 'block';
+                document.getElementById('errorMessage').textContent = error.message;
+            }
+        });
+
+        // Direct Upload Form (simplified - you already have this)
+        document.getElementById('fileInput')?.addEventListener('change', (e) => {
+            const files = Array.from(e.target.files);
+            const fileList = document.getElementById('fileList');
+            fileList.innerHTML = '';
+            
+            files.forEach(file => {
+                if (file.size > 50 * 1024 * 1024) {
+                    alert(`${file.name} is larger than 50MB. Please use the Shared Links method.`);
+                    e.target.value = '';
+                    return;
+                }
+                
+                const item = document.createElement('div');
+                item.className = 'file-item';
+                item.innerHTML = `
+                    <span>${file.name}</span>
+                    <span>${formatFileSize(file.size)}</span>
+                `;
+                fileList.appendChild(item);
+            });
+        });
+
+        function updateProgress(percent, text) {
+            document.getElementById('progressFill').style.width = percent + '%';
+            document.getElementById('progressText').textContent = text;
+        }
+
+        function copyJobId() {
+            const jobId = document.getElementById('jobId').textContent;
+            navigator.clipboard.writeText(jobId).then(() => {
+                alert('Job ID copied to clipboard!');
+            });
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+        }
+    </script>
+</body>
+</html>
