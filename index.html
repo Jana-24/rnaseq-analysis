@@ -163,6 +163,65 @@
         
         .result-box a:hover { background: #15803d; }
         
+        /* Job ID Box */
+        .job-id-box {
+            background: #ecfdf5;
+            border: 2px dashed #10b981;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 16px 0;
+            text-align: center;
+        }
+        
+        .job-id-label {
+            display: block;
+            font-size: 13px;
+            color: #059669;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .job-id-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .job-id-value {
+            font-family: 'Courier New', monospace;
+            font-size: 20px;
+            font-weight: 700;
+            color: #065f46;
+            background: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            border: 1px solid #a7f3d0;
+        }
+        
+        .copy-btn {
+            padding: 12px 20px;
+            background: #10b981;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        
+        .copy-btn:hover { background: #059669; }
+        .copy-btn.copied { background: #065f46; }
+        
+        .job-id-hint {
+            display: block;
+            font-size: 12px;
+            color: #047857;
+            margin-top: 10px;
+        }
+        
         .spinner {
             display: inline-block;
             width: 20px;
@@ -305,6 +364,34 @@ https://drive.google.com/file/d/1XYZ.../view" required></textarea>
         // UPDATE THIS URL after deploying Apps Script
         const API_URL = 'https://script.google.com/macros/s/AKfycbxfSjbhX4dqAtptYecF-9zpAtKYSswn2cJQT0n28ndeZzwZRsBM0X_gaNH3f3AHmIbu4w/exec';
         
+        function copyJobId(jobId) {
+            navigator.clipboard.writeText(jobId).then(() => {
+                const btn = document.querySelector('.copy-btn');
+                btn.textContent = '✓ Copied!';
+                btn.classList.add('copied');
+                setTimeout(() => {
+                    btn.textContent = '📋 Copy';
+                    btn.classList.remove('copied');
+                }, 2000);
+            }).catch(() => {
+                // Fallback for older browsers
+                const input = document.createElement('input');
+                input.value = jobId;
+                document.body.appendChild(input);
+                input.select();
+                document.execCommand('copy');
+                document.body.removeChild(input);
+                
+                const btn = document.querySelector('.copy-btn');
+                btn.textContent = '✓ Copied!';
+                btn.classList.add('copied');
+                setTimeout(() => {
+                    btn.textContent = '📋 Copy';
+                    btn.classList.remove('copied');
+                }, 2000);
+            });
+        }
+        
         async function submitJob(e) {
             e.preventDefault();
             
@@ -351,7 +438,14 @@ https://drive.google.com/file/d/1XYZ.../view" required></textarea>
                     result.className = 'result-box success';
                     result.innerHTML = `
                         <h3>✅ Job Created Successfully!</h3>
-                        <p><strong>Job ID:</strong> ${data.job_id}</p>
+                        <div class="job-id-box">
+                            <span class="job-id-label">Your Job ID</span>
+                            <div class="job-id-row">
+                                <code class="job-id-value" id="jobIdValue">${data.job_id}</code>
+                                <button class="copy-btn" onclick="copyJobId('${data.job_id}')">📋 Copy</button>
+                            </div>
+                            <span class="job-id-hint">⚠️ Save this ID to check your results later!</span>
+                        </div>
                         <p><strong>Files:</strong> ${data.total_files} FASTQ files</p>
                         <p>📧 You will receive an email confirmation shortly.</p>
                         <a href="status.html?job_id=${data.job_id}">📊 Track Job Status →</a>
