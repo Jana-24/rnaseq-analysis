@@ -3,292 +3,580 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>View Results - RNA-seq Analysis</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>RNA-seq Analysis Results</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .search-section {
+            margin-bottom: 30px;
+        }
+        
+        .input-group {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .input-group input {
+            flex: 1;
+            padding: 14px 18px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.2s;
+        }
+        
+        .input-group input:focus {
+            outline: none;
+            border-color: #16a34a;
+        }
+        
+        .btn {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: #16a34a;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #15803d;
+            transform: translateY(-1px);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .status-card {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+        
+        .status-card.loading {
+            background: #fef3c7;
+            border-color: #fde68a;
+        }
+        
+        .status-card.error {
+            background: #fef2f2;
+            border-color: #fecaca;
+        }
+        
+        .status-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .status-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #15803d;
+        }
+        
+        .status-badge {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        
+        .badge-completed {
+            background: #dcfce7;
+            color: #15803d;
+        }
+        
+        .badge-pending {
+            background: #fef3c7;
+            color: #b45309;
+        }
+        
+        .badge-processing {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+        
+        .badge-failed {
+            background: #fecaca;
+            color: #b91c1c;
+        }
+        
+        .files-section {
+            margin-top: 25px;
+        }
+        
+        .files-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #374151;
+        }
+        
+        .file-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            background: #f9fafb;
+            border-radius: 10px;
+            border: 1px solid #e5e7eb;
+            transition: all 0.2s;
+        }
+        
+        .file-item:hover {
+            background: #f3f4f6;
+            border-color: #d1d5db;
+        }
+        
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .file-icon {
+            width: 40px;
+            height: 40px;
+            background: #e0e7ff;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+        
+        .file-icon.csv { background: #dcfce7; }
+        .file-icon.xlsx { background: #dbeafe; }
+        .file-icon.html { background: #fef3c7; }
+        .file-icon.txt { background: #f3e8ff; }
+        
+        .file-name {
+            font-weight: 500;
+            color: #374151;
+        }
+        
+        .file-size {
+            font-size: 13px;
+            color: #6b7280;
+        }
+        
+        .file-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 14px;
+            border-radius: 6px;
+        }
+        
+        .btn-download {
+            background: #2563eb;
+            color: white;
+        }
+        
+        .btn-download:hover {
+            background: #1d4ed8;
+        }
+        
+        .btn-view {
+            background: #6b7280;
+            color: white;
+        }
+        
+        .btn-view:hover {
+            background: #4b5563;
+        }
+        
+        .folder-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 20px;
+            background: #16a34a;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            margin-top: 20px;
+            transition: all 0.2s;
+        }
+        
+        .folder-link:hover {
+            background: #15803d;
+            transform: translateY(-1px);
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #6b7280;
+        }
+        
+        .empty-state svg {
+            width: 64px;
+            height: 64px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #fff;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-right: 8px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .job-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .info-item {
+            text-align: center;
+            padding: 12px;
+            background: white;
+            border-radius: 8px;
+        }
+        
+        .info-label {
+            font-size: 12px;
+            color: #6b7280;
+            margin-bottom: 4px;
+        }
+        
+        .info-value {
+            font-weight: 600;
+            color: #374151;
+        }
+        
+        @media (max-width: 600px) {
+            .input-group {
+                flex-direction: column;
+            }
+            
+            .file-item {
+                flex-direction: column;
+                gap: 12px;
+                align-items: flex-start;
+            }
+            
+            .file-actions {
+                width: 100%;
+            }
+            
+            .file-actions .btn {
+                flex: 1;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="container">
-        <header>
-            <h1>🧬 RNA-seq Analysis Platform</h1>
-            <p>View and download results</p>
-        </header>
-
-        <nav>
-            <a href="index.html">Upload</a>
-            <a href="status.html">Check Status</a>
-            <a href="results.html" class="active">Results</a>
-        </nav>
-
-        <main>
-            <div class="results-section">
-                <h2>View Results</h2>
+        <div class="card">
+            <div class="header">
+                <h1>📊 Analysis Results</h1>
+                <p>Download your RNA-seq analysis results</p>
+            </div>
+            
+            <div class="content">
+                <!-- Search Section -->
+                <div class="search-section">
+                    <div class="input-group">
+                        <input type="text" id="jobIdInput" placeholder="Enter Job ID (e.g., job_20251205_143022)">
+                        <button class="btn btn-primary" id="searchBtn" onclick="loadResults()">
+                            Search
+                        </button>
+                    </div>
+                </div>
                 
-                <form id="resultsForm">
-                    <div class="form-group">
-                        <label for="jobIdInput">Enter Job ID</label>
-                        <input type="text" id="jobIdInput" required 
-                               placeholder="job_20251130_143022">
-                        <small>Enter the Job ID to view results</small>
-                    </div>
-
-                    <button type="submit" class="btn-primary">Get Results</button>
-                </form>
-
-                <div id="resultsLoading" class="loading-section" style="display: none;">
-                    <div class="spinner"></div>
-                    <p>Loading results...</p>
-                </div>
-
-                <div id="resultsDisplay" class="results-display" style="display: none;">
-                    <div class="results-header">
-                        <h3>Results for Job: <span id="displayJobId"></span></h3>
-                        <span id="completedTime"></span>
-                    </div>
-
-                    <div class="results-files">
-                        <h4>📥 Available Files</h4>
-                        <div id="filesList"></div>
-                    </div>
-
-                    <div class="results-summary">
-                        <h4>📊 Analysis Summary</h4>
-                        <div id="summaryContent"></div>
-                    </div>
-
-                    <div class="results-actions">
-                        <button onclick="downloadAll()" class="btn-primary">Download All</button>
-                        <button onclick="location.href='status.html?job_id=' + currentJobId" 
-                                class="btn-secondary">View Status</button>
-                    </div>
-                </div>
-
-                <div id="resultsError" class="error-section" style="display: none;">
-                    <h3>❌ Results Not Available</h3>
-                    <p id="resultsErrorMsg"></p>
-                    <button onclick="location.reload()" class="btn-secondary">Try Again</button>
-                </div>
-
-                <div id="resultsNotReady" class="warning-section" style="display: none;">
-                    <h3>⏳ Results Not Ready Yet</h3>
-                    <p>This job is still processing. Please check back later.</p>
-                    <p>Current status: <strong id="currentStatus"></strong></p>
-                    <div class="actions">
-                        <a id="statusLink" href="#" class="btn-primary">Check Status</a>
-                        <button onclick="location.reload()" class="btn-secondary">Refresh</button>
+                <!-- Results Container -->
+                <div id="resultsContainer">
+                    <div class="empty-state">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <p>Enter a Job ID to view results</p>
                     </div>
                 </div>
             </div>
-
-            <div class="info-section">
-                <h3>📁 Result Files</h3>
-                <p>Completed jobs will include:</p>
-                <ul>
-                    <li><strong>predicted_phases.csv</strong> - ML predictions with probabilities</li>
-                    <li><strong>pca_plots.pdf</strong> - PCA visualization for each sample</li>
-                    <li><strong>quality_metrics_summary.xlsx</strong> - QC metrics</li>
-                    <li><strong>train_vst_batch_corrected.csv</strong> - Normalized training data</li>
-                    <li><strong>test_vst_batch_corrected.csv</strong> - Normalized test data</li>
-                    <li><strong>normalization_summary.txt</strong> - Normalization details</li>
-                </ul>
-
-                <h3>💡 Tips</h3>
-                <ul>
-                    <li>Results are available for 30 days after completion</li>
-                    <li>Download all files for complete analysis</li>
-                    <li>Open .csv files in Excel or any spreadsheet software</li>
-                    <li>PCA plots show sample clustering and predictions</li>
-                </ul>
-            </div>
-        </main>
-
-        <footer>
-            <p>RNA-seq Analysis Platform • Free & Open Source • 
-               <a href="https://github.com/yourusername/rnaseq-analysis" target="_blank">GitHub</a>
-            </p>
-        </footer>
+        </div>
     </div>
 
-    <script src="config.js"></script>
-    <script src="app.js"></script>
     <script>
-        let currentJobId = null;
-        let resultsData = null;
-
-        document.getElementById('resultsForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const jobId = document.getElementById('jobIdInput').value.trim();
-            await loadResults(jobId);
+        // Configuration - UPDATE THIS URL
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxfSjbhX4dqAtptYecF-9zpAtKYSswn2cJQT0n28ndeZzwZRsBM0X_gaNH3f3AHmIbu4w/exec';
+        
+        // Check URL for job_id parameter
+        window.onload = function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const jobId = urlParams.get('job_id');
+            if (jobId) {
+                document.getElementById('jobIdInput').value = jobId;
+                loadResults();
+            }
+        };
+        
+        // Handle Enter key
+        document.getElementById('jobIdInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                loadResults();
+            }
         });
-
-        async function loadResults(jobId) {
-            currentJobId = jobId;
-
-            // Hide all sections
-            document.getElementById('resultsForm').style.display = 'none';
-            document.getElementById('resultsDisplay').style.display = 'none';
-            document.getElementById('resultsError').style.display = 'none';
-            document.getElementById('resultsNotReady').style.display = 'none';
-            document.getElementById('resultsLoading').style.display = 'block';
-
+        
+        async function loadResults() {
+            const jobId = document.getElementById('jobIdInput').value.trim();
+            const container = document.getElementById('resultsContainer');
+            const searchBtn = document.getElementById('searchBtn');
+            
+            if (!jobId) {
+                alert('Please enter a Job ID');
+                return;
+            }
+            
+            // Show loading state
+            searchBtn.disabled = true;
+            searchBtn.innerHTML = '<span class="spinner"></span>Loading...';
+            
+            container.innerHTML = `
+                <div class="status-card loading">
+                    <div style="text-align: center;">
+                        <span class="spinner" style="border-color: #b45309; border-top-color: transparent;"></span>
+                        Loading results for ${jobId}...
+                    </div>
+                </div>
+            `;
+            
             try {
-                // First check status
-                const status = await getJobStatus(jobId);
-
-                if (status.status !== 'completed') {
-                    // Job not completed yet
-                    document.getElementById('resultsLoading').style.display = 'none';
-                    document.getElementById('resultsNotReady').style.display = 'block';
-                    document.getElementById('currentStatus').textContent = status.status;
-                    document.getElementById('statusLink').href = 'status.html?job_id=' + jobId;
-                    return;
+                // First get job status
+                const statusResponse = await fetch(`${APPS_SCRIPT_URL}?action=get_job_status&job_id=${encodeURIComponent(jobId)}`);
+                const statusData = await statusResponse.json();
+                
+                if (statusData.error) {
+                    throw new Error(statusData.error);
                 }
-
-                // Get results
-                const results = await getJobResults(jobId);
-                displayResults(results, status);
-
+                
+                // Then get results list
+                const resultsResponse = await fetch(`${APPS_SCRIPT_URL}?action=list_results&job_id=${encodeURIComponent(jobId)}`);
+                const resultsData = await resultsResponse.json();
+                
+                displayResults(jobId, statusData, resultsData);
+                
             } catch (error) {
-                document.getElementById('resultsLoading').style.display = 'none';
-                document.getElementById('resultsError').style.display = 'block';
-                document.getElementById('resultsErrorMsg').textContent = error.message;
-            }
-        }
-
-        function displayResults(results, status) {
-            resultsData = results;
-
-            document.getElementById('resultsLoading').style.display = 'none';
-            document.getElementById('resultsDisplay').style.display = 'block';
-
-            // Header
-            document.getElementById('displayJobId').textContent = results.job_id;
-            document.getElementById('completedTime').textContent = 
-                'Completed: ' + formatTimestamp(status.updated_at);
-
-            // Files list
-            const filesList = document.getElementById('filesList');
-            filesList.innerHTML = '';
-
-            if (results.files && results.files.length > 0) {
-                results.files.forEach(file => {
-                    const fileItem = document.createElement('div');
-                    fileItem.className = 'file-result-item';
-                    
-                    const icon = getFileIcon(file.name);
-                    const size = formatFileSize(file.size);
-                    
-                    fileItem.innerHTML = `
-                        <div class="file-info">
-                            <span class="file-icon">${icon}</span>
-                            <div class="file-details">
-                                <div class="file-name">${file.name}</div>
-                                <div class="file-meta">${size}</div>
-                            </div>
+                console.error('Error:', error);
+                container.innerHTML = `
+                    <div class="status-card error">
+                        <div class="status-header">
+                            <span class="status-title">Error</span>
                         </div>
-                        <button onclick="downloadFile('${file.id}', '${file.name}')" 
-                                class="btn-download">Download</button>
-                    `;
-                    
-                    filesList.appendChild(fileItem);
-                });
-            } else {
-                filesList.innerHTML = '<p>No result files available</p>';
-            }
-
-            // Summary
-            const summaryContent = document.getElementById('summaryContent');
-            if (results.summary) {
-                summaryContent.innerHTML = `
-                    <div class="summary-grid">
-                        <div class="summary-item">
-                            <span class="summary-label">Samples Analyzed</span>
-                            <span class="summary-value">${results.summary.samples || 'N/A'}</span>
-                        </div>
-                        <div class="summary-item">
-                            <span class="summary-label">Genes Processed</span>
-                            <span class="summary-value">${results.summary.genes || 'N/A'}</span>
-                        </div>
-                        <div class="summary-item">
-                            <span class="summary-label">Processing Time</span>
-                            <span class="summary-value">${results.summary.duration || 'N/A'}</span>
-                        </div>
-                        <div class="summary-item">
-                            <span class="summary-label">Status</span>
-                            <span class="summary-value success">✓ Complete</span>
-                        </div>
+                        <p>${error.message}</p>
+                        <p style="margin-top: 10px; font-size: 14px; color: #6b7280;">
+                            Make sure the Job ID is correct and the job exists.
+                        </p>
                     </div>
                 `;
-            } else {
-                summaryContent.innerHTML = '<p>Summary not available</p>';
+            } finally {
+                searchBtn.disabled = false;
+                searchBtn.innerHTML = 'Search';
             }
         }
-
-        async function downloadFile(fileId, fileName) {
-            try {
-                const url = await getDownloadUrl(currentJobId, fileId);
+        
+        function displayResults(jobId, statusData, resultsData) {
+            const container = document.getElementById('resultsContainer');
+            
+            const status = statusData.status || 'unknown';
+            const badgeClass = {
+                'completed': 'badge-completed',
+                'processing': 'badge-processing',
+                'pending': 'badge-pending',
+                'failed': 'badge-failed'
+            }[status] || 'badge-pending';
+            
+            const statusIcon = {
+                'completed': '✅',
+                'processing': '⏳',
+                'pending': '🕐',
+                'failed': '❌'
+            }[status] || '❓';
+            
+            let html = `
+                <div class="status-card">
+                    <div class="status-header">
+                        <span class="status-title">Job: ${jobId}</span>
+                        <span class="status-badge ${badgeClass}">${statusIcon} ${status.charAt(0).toUpperCase() + status.slice(1)}</span>
+                    </div>
+                    
+                    <div class="job-info">
+                        <div class="info-item">
+                            <div class="info-label">Stage</div>
+                            <div class="info-value">${statusData.stage || 'N/A'}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Progress</div>
+                            <div class="info-value">${statusData.progress || 0}%</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Files</div>
+                            <div class="info-value">${statusData.total_files || 'N/A'}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Show files if available
+            if (resultsData.files && resultsData.files.length > 0) {
+                html += `
+                    <div class="files-section">
+                        <h3 class="files-title">📁 Result Files (${resultsData.files.length})</h3>
+                        <div class="file-list">
+                `;
                 
-                // Create temporary link and trigger download
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = fileName;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
+                for (const file of resultsData.files) {
+                    const ext = file.name.split('.').pop().toLowerCase();
+                    const iconClass = ['csv', 'xlsx', 'html', 'txt'].includes(ext) ? ext : '';
+                    const icon = {
+                        'csv': '📊',
+                        'xlsx': '📗',
+                        'html': '🌐',
+                        'txt': '📝',
+                        'pdf': '📕'
+                    }[ext] || '📄';
+                    
+                    const sizeStr = formatFileSize(file.size);
+                    
+                    html += `
+                        <div class="file-item">
+                            <div class="file-info">
+                                <div class="file-icon ${iconClass}">${icon}</div>
+                                <div>
+                                    <div class="file-name">${file.name}</div>
+                                    <div class="file-size">${sizeStr}</div>
+                                </div>
+                            </div>
+                            <div class="file-actions">
+                                ${file.web_link ? `<a href="${file.web_link}" target="_blank" class="btn btn-small btn-view">View</a>` : ''}
+                                ${file.url ? `<a href="${file.url}" class="btn btn-small btn-download">Download</a>` : 
+                                  `<a href="https://drive.google.com/uc?export=download&id=${file.id}" class="btn btn-small btn-download">Download</a>`}
+                            </div>
+                        </div>
+                    `;
+                }
                 
-            } catch (error) {
-                alert('Error downloading file: ' + error.message);
+                html += `</div>`;
+                
+                // Add folder link
+                if (resultsData.results_folder_url) {
+                    html += `
+                        <a href="${resultsData.results_folder_url}" target="_blank" class="folder-link">
+                            📂 Open Results Folder in Google Drive
+                        </a>
+                    `;
+                }
+                
+                html += `</div>`;
+            } else if (status === 'completed') {
+                html += `
+                    <div class="empty-state">
+                        <p>No result files found yet. They may still be uploading.</p>
+                        <p style="margin-top: 10px;">Try refreshing in a few minutes.</p>
+                    </div>
+                `;
+            } else if (status === 'processing') {
+                html += `
+                    <div class="empty-state">
+                        <p>Analysis is still in progress...</p>
+                        <p style="margin-top: 10px;">Results will appear here when complete.</p>
+                    </div>
+                `;
+            } else if (status === 'pending') {
+                html += `
+                    <div class="empty-state">
+                        <p>Job is queued and waiting to start.</p>
+                    </div>
+                `;
             }
-        }
-
-        async function downloadAll() {
-            if (!resultsData || !resultsData.files) return;
             
-            const confirmed = confirm(
-                `This will download ${resultsData.files.length} files. Continue?`
-            );
-            
-            if (!confirmed) return;
-            
-            for (const file of resultsData.files) {
-                await downloadFile(file.id, file.name);
-                // Small delay between downloads
-                await new Promise(resolve => setTimeout(resolve, 1000));
-            }
+            container.innerHTML = html;
         }
-
-        function getFileIcon(fileName) {
-            const ext = fileName.split('.').pop().toLowerCase();
-            const icons = {
-                'csv': '📊',
-                'pdf': '📄',
-                'xlsx': '📈',
-                'txt': '📝',
-                'html': '🌐',
-                'json': '📋'
-            };
-            return icons[ext] || '📁';
-        }
-
+        
         function formatFileSize(bytes) {
-            if (bytes === 0) return '0 Bytes';
-            const k = 1024;
-            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-            const i = Math.floor(Math.log(bytes) / Math.log(k));
-            return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
-        }
-
-        function formatTimestamp(timestamp) {
-            if (!timestamp) return 'N/A';
-            const date = new Date(timestamp);
-            return date.toLocaleString();
-        }
-
-        // Check if job_id in URL
-        const urlParams = new URLSearchParams(window.location.search);
-        const jobIdFromUrl = urlParams.get('job_id');
-        if (jobIdFromUrl) {
-            document.getElementById('jobIdInput').value = jobIdFromUrl;
-            loadResults(jobIdFromUrl);
+            if (!bytes) return 'Unknown size';
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+            if (bytes < 1024 * 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+            return (bytes / (1024 * 1024 * 1024)).toFixed(1) + ' GB';
         }
     </script>
 </body>
