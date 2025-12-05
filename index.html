@@ -547,25 +547,69 @@
             }
         }
 
-        // Shared Links Form Submission
+// Shared Links Form Submission
         document.getElementById('sharedLinksForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
             const email = document.getElementById('emailShared').value;
             const linkInputs = document.querySelectorAll('#linkInputs input');
-            const fileLinks = [];
+            const links = [];
             
-            linkInputs.forEach((input, index) => {
+            linkInputs.forEach((input) => {
                 if (input.value.trim()) {
-                    // Determine if folder or file for better naming
-                    const isFolder = input.value.includes('/folders/');
-                    const linkName = isFolder ? `folder_${index + 1}` : `file_${index + 1}.fq.gz`;
-                    fileLinks.push({
-                        name: linkName,
-                        url: input.value.trim()
-                    });
+                    links.push(input.value.trim());
                 }
             });
+            
+            if (links.length === 0) {
+                alert('Please add at least one link');
+                return;
+            }
+            
+            // Hide form, show progress
+            document.getElementById('sharedLinksSection').style.display = 'none';
+            document.getElementById('uploadProgress').style.display = 'block';
+            updateProgress(30, 'Submitting job to server...');
+            
+            try {
+                const response = await fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'create_job_from_links',
+                        user_email: email,
+                        links: links.join(',')
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.error) {
+                    throw new Error(result.error);
+                }
+                
+                updateProgress(100, 'Files copied successfully!');
+                
+                // Show success
+                setTimeout(() => {
+                    document.getElementById('uploadProgress').style.display = 'none';
+                    document.getElementById('uploadResult').style.display = 'block';
+                    document.getElementById('jobId').textContent = result.job_id;
+                    
+                    const summary = `
+                        <p style="margin-top: 15px;">
+                            <strong>Files copied:</strong> ${result.total_files}<br>
+                            <strong>Job folder:</strong> <a href="${result.job_folder_url}" target="_blank">View in Drive</a>
+                        </p>
+                    `;
+                    document.getElementById('filesSummary').innerHTML = summary;
+                }, 500);
+                
+            } catch (error) {
+                document.getElementById('uploadProgress').style.display = 'none';
+                document.getElementById('uploadError').style.display = 'block';
+                document.getElementById('errorMessage').textContent = error.message;
+            }
+        });
             
             if (fileLinks.length === 0) {
                 alert('Please add at least one link');
