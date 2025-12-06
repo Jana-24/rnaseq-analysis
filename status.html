@@ -492,12 +492,12 @@
         function renderStages(progress) {
             const stages = [
                 { name: 'Download files', threshold: 5 },
-                { name: 'FastQC (raw)', threshold: 35 },
-                { name: 'Trimming (fastp)', threshold: 40 },
-                { name: 'FastQC (trimmed)', threshold: 58 },
-                { name: 'Alignment (HISAT2)', threshold: 60 },
-                { name: 'Counting (featureCounts)', threshold: 80 },
-                { name: 'Normalization (DESeq2)', threshold: 86 },
+                { name: 'Quality check (raw)', threshold: 35 },
+                { name: 'Trimming', threshold: 40 },
+                { name: 'Quality check (trimmed)', threshold: 58 },
+                { name: 'Alignment', threshold: 60 },
+                { name: 'Counting', threshold: 80 },
+                { name: 'Normalization', threshold: 86 },
                 { name: 'ML Prediction', threshold: 89 },
                 { name: 'Upload results', threshold: 92 },
                 { name: 'Complete', threshold: 100 }
