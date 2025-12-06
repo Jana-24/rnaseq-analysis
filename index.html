@@ -308,11 +308,6 @@
             <div class="content">
                 <form id="submitForm" onsubmit="submitJob(event)">
                     <div class="form-group">
-                        <label>👤 Your Name</label>
-                        <input type="text" id="userName" placeholder="Enter your name" required>
-                    </div>
-                    
-                    <div class="form-group">
                         <label>📧 Your Email</label>
                         <input type="email" id="userEmail" placeholder="you@example.com" required>
                         <small>You'll receive job confirmation and results notification at this email</small>
@@ -398,11 +393,10 @@ https://drive.google.com/file/d/1XYZ.../view" required></textarea>
             const btn = document.getElementById('submitBtn');
             const result = document.getElementById('result');
             
-            const userName = document.getElementById('userName').value.trim();
             const userEmail = document.getElementById('userEmail').value.trim();
             const links = document.getElementById('driveLinks').value.trim();
             
-            if (!userName || !userEmail || !links) {
+            if (!userEmail || !links) {
                 alert('Please fill in all fields');
                 return;
             }
@@ -426,7 +420,6 @@ https://drive.google.com/file/d/1XYZ.../view" required></textarea>
             try {
                 const params = new URLSearchParams({
                     action: 'create_job_from_links',
-                    user_name: userName,
                     user_email: userEmail,
                     links: linkList
                 });
